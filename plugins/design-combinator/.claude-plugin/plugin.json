@@ -1,0 +1,12 @@
+{
+  "name": "design-combinator",
+  "description": "A live, in-browser combinable design dock for any existing page. Bundles two skills: design-options (audits a page and generates named design options grounded in its own identity) and design-combinator (turns those options into a live dock where you combine fonts, colors, components, and section layouts at once — randomize, lock, save, compare, copy-config).",
+  "version": "0.1.0",
+  "author": {
+    "name": "Hardik Anand",
+    "email": "hardikanand.cs@gmail.com"
+  },
+  "homepage": "https://github.com/Hardik1697/design-combinator",
+  "repository": "https://github.com/Hardik1697/design-combinator",
+  "license": "MIT"
+}

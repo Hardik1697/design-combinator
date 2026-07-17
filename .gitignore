@@ -1,0 +1,11 @@
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+*.swp
+
+# Runtime staging the skills create next to a target page (never part of the tool)
+.design-options/
+.design-combinator/
+
+# Local scratch
+*.log

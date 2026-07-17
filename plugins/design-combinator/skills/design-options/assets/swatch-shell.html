@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title><!-- SLOT: TITLE --></title>
+<!--
+  design-options :: swatch-shell.html
+  Self-contained swatch sheet (references/preview.md builds one of these when the picks
+  include C1/C2/T1/T2 — color/font dims that can't be judged from prose). Zero external
+  requests: all CSS is inline; fonts are loaded per-specimen only if the runtime adds a
+  <link> inside a slot (see below) — the shell itself makes no network calls.
+
+  Runtime contract — replace the matching HTML-comment placeholder markers with real markup,
+  nothing else (marker names below are written WITHOUT comment delimiters to avoid nesting
+  HTML comments, which is illegal — find the literal "SLOT: TITLE" / "SLOT: FONT-LINKS" /
+  "SLOT: SPECIMENS" markers elsewhere in this file):
+    SLOT: TITLE       one line, e.g. "Color + font options — <page>"
+    SLOT: FONT-LINKS  optional stylesheet link tags pointing at a font host, one per proposed
+                      font pick (only network calls this page makes, and only when the user is
+                      previewing font options)
+    SLOT: SPECIMENS   one <article class="dos-card"> per option, e.g.:
+                                 <article class="dos-card">
+                                   <header class="dos-card__head">
+                                     <h2 class="dos-card__name">complement-pop</h2>
+                                     <p class="dos-card__rationale">your accent is a single
+                                       #2563eb used 4 places -> this adds a chroma-matched
+                                       pop reserved for CTAs only</p>
+                                   </header>
+                                   <div class="dos-card__chips">
+                                     <span class="dos-chip" style="background:#0b3d2e"></span>
+                                     <span class="dos-chip" style="background:#e2572b"></span>
+                                     <span class="dos-chip" style="background:#f5f1e8"></span>
+                                   </div>
+                                   <div class="dos-card__type" style="font-family:'Fraunces',serif">
+                                     <p class="dos-card__heading-sample">Aa Bb Gg — the quick brown fox</p>
+                                     <p class="dos-card__body-sample">Body text sample in the
+                                       proposed pairing, long enough to judge rhythm and
+                                       texture at reading size.</p>
+                                   </div>
+                                 </article>
+
+  Dimension grouping (drives the "DIM: name" copy format, see the click-to-pick script below):
+  when specimens cover more than one dimension, precede each dimension's card run with
+  <h2 class="dos-section-title">N · dim-name</h2> (N = the menu number, dim-name lowercase-
+  hyphenated, e.g. "7 · color-scheme"; a trailing parenthetical is stripped automatically,
+  e.g. "2 · body-font (paired against ...)" reads as "body-font"). The picker walks each
+  card's preceding siblings for the nearest .dos-section-title and copies picks as
+  "BODY-FONT: geometric-echo" instead of a bare name. Skip the header for a single-dimension
+  sheet, or set data-dim="dim-name" directly on the <article> to bypass the header lookup.
+-->
+<style>
+  :root {
+    color-scheme: light dark;
+    --dos-bg: #f6f6f4;
+    --dos-panel: #ffffff;
+    --dos-ink: #16181a;
+    --dos-muted: #6b7076;
+    --dos-line: #dcdedf;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --dos-bg: #121314;
+      --dos-panel: #1b1d1f;
+      --dos-ink: #f0f1f2;
+      --dos-muted: #9a9fa5;
+      --dos-line: #2c2f32;
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--dos-bg);
+    color: var(--dos-ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  }
+  header.dos-header {
+    padding: 22px 24px 8px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+  header.dos-header h1 {
+    font-size: 18px;
+    margin: 0 0 4px;
+  }
+  header.dos-header p {
+    font-size: 12px;
+    color: var(--dos-muted);
+    margin: 0;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  main.dos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 18px;
+    padding: 16px 24px 40px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+  .dos-section-title {
+    grid-column: 1 / -1;
+    margin: 18px 0 -4px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--dos-muted);
+    border-top: 1px solid var(--dos-line);
+    padding-top: 18px;
+  }
+  .dos-section-title:first-child { border-top: none; padding-top: 0; margin-top: 0; }
+  .dos-card {
+    background: var(--dos-panel);
+    border: 1px solid var(--dos-line);
+    border-radius: 10px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    position: relative;
+    cursor: pointer;
+    transition: border-color .12s, background .12s, outline-color .12s;
+  }
+  .dos-card:hover { border-color: #3b82f6; }
+  .dos-card:focus-visible { outline: none; box-shadow: 0 0 0 2px #3b82f6; }
+  .dos-card--picked {
+    outline: 2px solid #3b82f6;
+    outline-offset: -1px;
+    background: rgba(59, 130, 246, 0.06);
+  }
+  .dos-card--picked::after {
+    content: "\2713";
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #3b82f6;
+    color: #fff;
+    font-size: 12px;
+    line-height: 20px;
+    text-align: center;
+  }
+  .dos-card__head { display: flex; flex-direction: column; gap: 4px; }
+  .dos-card__name {
+    font-size: 14px;
+    font-weight: 700;
+    margin: 0;
+  }
+  .dos-card__rationale {
+    font-size: 12px;
+    line-height: 1.45;
+    color: var(--dos-muted);
+    margin: 0;
+  }
+  .dos-card__chips {
+    display: flex;
+    gap: 6px;
+  }
+  .dos-chip {
+    flex: 1;
+    height: 34px;
+    border-radius: 6px;
+    border: 1px solid rgba(0,0,0,0.08);
+  }
+  .dos-card__type {
+    border-top: 1px solid var(--dos-line);
+    padding-top: 10px;
+  }
+  .dos-card__heading-sample {
+    font-size: 20px;
+    line-height: 1.2;
+    margin: 0 0 6px;
+  }
+  .dos-card__body-sample {
+    font-size: 13px;
+    line-height: 1.55;
+    margin: 0;
+    color: var(--dos-ink);
+  }
+  .dos-empty {
+    grid-column: 1 / -1;
+    padding: 40px 20px;
+    color: var(--dos-muted);
+    font-size: 13px;
+    text-align: center;
+  }
+  /* click-to-pick — no backend exists to submit picks directly; this copies the exact
+     reply string to the clipboard so the user pastes it into chat instead of typing it.
+     The whole .dos-card tile is the click target (see .dos-card--picked above, .dos-card
+     base rule). */
+  main.dos-grid { padding-bottom: 64px; }
+  .dos-pickbar {
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 20px;
+    background: var(--dos-panel);
+    border-top: 1px solid var(--dos-line);
+    box-shadow: 0 -4px 16px rgba(0,0,0,.08);
+    z-index: 10;
+  }
+  .dos-pickbar__label {
+    flex: 1;
+    font-size: 12px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    color: var(--dos-ink);
+    overflow-wrap: anywhere;
+  }
+  .dos-pickbar__copy, .dos-pickbar__clear {
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: 1px solid var(--dos-line);
+    background: var(--dos-bg);
+    color: var(--dos-ink);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .dos-pickbar__copy:disabled, .dos-pickbar__clear:disabled { opacity: .4; cursor: not-allowed; }
+</style>
+<!-- SLOT: FONT-LINKS -->
+</head>
+<body>
+  <header class="dos-header">
+    <h1><!-- SLOT: TITLE --></h1>
+    <p>unranked, catalog order — click a tile to pick it, then copy the picks below</p>
+  </header>
+
+  <main class="dos-grid">
+    <!-- SLOT: SPECIMENS -->
+  </main>
+
+  <script>
+  (function () {
+    "use strict";
+    var grid = document.querySelector("main.dos-grid");
+    var cards = Array.prototype.slice.call(document.querySelectorAll(".dos-card"));
+
+    if (!cards.length) {
+      if (grid) {
+        var empty = document.createElement("p");
+        empty.className = "dos-empty";
+        empty.textContent = "No specimens loaded yet — replace the SPECIMENS slot with one .dos-card article per option.";
+        grid.appendChild(empty);
+      }
+      return;
+    }
+
+    // The whole .dos-card tile is the click target — no checkbox, no separate control.
+    // Authors never hand-write any of this; it's retrofitted here so every swatch sheet
+    // (past or future) gets it for free.
+    var bar = document.createElement("div");
+    bar.className = "dos-pickbar";
+    bar.innerHTML =
+      '<span class="dos-pickbar__label" id="dos-pickbar-label">no picks selected</span>' +
+      '<button type="button" class="dos-pickbar__clear" id="dos-pickbar-clear" disabled>Clear picks</button>' +
+      '<button type="button" class="dos-pickbar__copy" id="dos-pickbar-copy" disabled>Copy picks</button>';
+    document.body.appendChild(bar);
+    var label = bar.querySelector("#dos-pickbar-label");
+    var clearBtn = bar.querySelector("#dos-pickbar-clear");
+    var copyBtn = bar.querySelector("#dos-pickbar-copy");
+
+    function update() {
+      var picked = cards
+        .filter(function (c) { return c.classList.contains("dos-card--picked"); })
+        .map(function (c) {
+          var dim = c.getAttribute("data-dim");
+          var name = c.getAttribute("data-name");
+          return dim ? (dim.toUpperCase() + ": " + name) : name;
+        });
+      if (!picked.length) {
+        label.textContent = "no picks selected";
+        copyBtn.disabled = true;
+        clearBtn.disabled = true;
+        return;
+      }
+      label.textContent = picked.join(", ");
+      copyBtn.disabled = false;
+      clearBtn.disabled = false;
+    }
+
+    clearBtn.addEventListener("click", function () {
+      cards.forEach(function (c) {
+        c.classList.remove("dos-card--picked");
+        c.setAttribute("aria-checked", "false");
+      });
+      update();
+    });
+
+    // Nearest preceding .dos-section-title ("N · dim-name", trailing parenthetical
+    // stripped) supplies the dimension when the article has no explicit data-dim.
+    function dimFromHeader(card) {
+      var el = card.previousElementSibling;
+      while (el) {
+        if (el.classList && el.classList.contains("dos-section-title")) {
+          var text = el.textContent.split("·")[1] || el.textContent;
+          return text.split("(")[0].trim();
+        }
+        el = el.previousElementSibling;
+      }
+      return null;
+    }
+
+    cards.forEach(function (card) {
+      var nameEl = card.querySelector(".dos-card__name");
+      if (!nameEl) return;
+      var name = nameEl.textContent.trim();
+      card.setAttribute("data-name", name);
+      if (!card.hasAttribute("data-dim")) {
+        var dim = dimFromHeader(card);
+        if (dim) card.setAttribute("data-dim", dim);
+      }
+      card.setAttribute("role", "checkbox");
+      card.setAttribute("aria-checked", "false");
+      card.setAttribute("tabindex", "0");
+      function toggle() {
+        var picked = card.classList.toggle("dos-card--picked");
+        card.setAttribute("aria-checked", picked ? "true" : "false");
+        update();
+      }
+      card.addEventListener("click", toggle);
+      card.addEventListener("keydown", function (e) {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          toggle();
+        }
+      });
+    });
+
+    function fallbackCopy(text, cb) {
+      var ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      try { document.execCommand("copy"); } catch (e) {}
+      document.body.removeChild(ta);
+      cb();
+    }
+
+    copyBtn.addEventListener("click", function () {
+      var text = label.textContent;
+      if (!text || copyBtn.disabled) return;
+      var done = function () {
+        var orig = copyBtn.textContent;
+        copyBtn.textContent = "Copied — paste into Claude Code";
+        setTimeout(function () { copyBtn.textContent = orig; }, 1800);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done, function () { fallbackCopy(text, done); });
+      } else {
+        fallbackCopy(text, done);
+      }
+    });
+  })();
+  </script>
+</body>
+</html>

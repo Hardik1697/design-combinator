@@ -1,0 +1,14 @@
+{
+  "name": "design-combinator",
+  "owner": {
+    "name": "Hardik Anand",
+    "email": "hardikanand.cs@gmail.com"
+  },
+  "plugins": [
+    {
+      "name": "design-combinator",
+      "source": "./plugins/design-combinator",
+      "description": "Live, grounded, combinable design exploration dock for existing pages (bundles design-options + design-combinator)."
+    }
+  ]
+}

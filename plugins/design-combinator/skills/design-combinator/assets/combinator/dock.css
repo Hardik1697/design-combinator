@@ -1,0 +1,204 @@
+/* =============================================================================
+   dock.css — design-combinator dock/stage chrome
+   Brand-agnostic: this file styles the DOCK TOOL ITSELF (panel, accordion,
+   option buttons, snapshots, FAB, stage host + responsive viewport frame,
+   identify/pick overlays, compare split, toast) — never the page it docks
+   onto. Per-page effect rules (attribute-selector CSS driving the target
+   page's own tokens/components) are generated separately by gen.mjs and
+   injected alongside this file. Chrome/workspace rules are gated to
+   `html:not(.cmb-embed-html)` so they never touch the embed iframe (the
+   real target page).
+   ============================================================================= */
+
+html:not(.cmb-embed-html), html:not(.cmb-embed-html) body{height:100%}
+html:not(.cmb-embed-html) body{margin:0; overflow:hidden; background:#14150f;
+  font-family:"Inter",-apple-system,system-ui,sans-serif; -webkit-font-smoothing:antialiased; color:#e9e7dd}
+
+/* inline target-page copy: hidden in normal mode, shown only as the embed page */
+.cmb-stage{display:none}
+body.cmb-embed .cmb-stage{display:block}
+body.cmb-embed #cmb-dock, body.cmb-embed #cmb-fab, body.cmb-embed #cmb-stage-host{display:none !important}
+
+/* stage host + iframe */
+#cmb-stage-host{position:fixed; inset:0 var(--cmb-dock-w,384px) 0 0; background:#191a12;
+  display:grid; place-items:stretch; overflow:auto; transition:inset .3s cubic-bezier(.16,1,.3,1)}
+.cmb-frame{width:100%; height:100%; border:0; display:block; background:#f0f0f0}
+#cmb-stage-host[data-vp="tablet"]{padding:24px; place-items:start center}
+#cmb-stage-host[data-vp="tablet"] .cmb-frame{width:834px; max-width:100%; border-radius:16px;
+  box-shadow:0 40px 90px -40px rgba(0,0,0,.6); border:1px solid rgba(255,255,255,.08)}
+#cmb-stage-host[data-vp="phone"]{padding:24px; place-items:start center}
+#cmb-stage-host[data-vp="phone"] .cmb-frame{width:390px; max-width:100%; border-radius:28px;
+  box-shadow:0 40px 90px -40px rgba(0,0,0,.6); border:8px solid #0c0d09}
+body.cmb-dock-hidden #cmb-stage-host{inset:0}
+body.cmb-dock-hidden #cmb-dock{transform:translateX(100%)}
+
+/* dock */
+#cmb-dock{position:fixed; top:0; right:0; bottom:0; width:var(--cmb-dock-w,384px); z-index:50;
+  display:flex; flex-direction:column; background:#1b1c14; color:#e9e7dd;
+  border-left:1px solid rgba(255,255,255,.08); transition:transform .3s cubic-bezier(.16,1,.3,1)}
+.cmb-head{padding:14px 16px; border-bottom:1px solid rgba(255,255,255,.08); display:flex; flex-direction:column; gap:10px}
+.cmb-title{font-weight:600; font-size:14px; display:flex; align-items:center; gap:8px}
+.cmb-title small{color:#9a988b; font-weight:400; margin-left:auto; font-size:11px}
+.cmb-dot{width:8px; height:8px; border-radius:50%; background:#3f9e63; box-shadow:0 0 0 4px rgba(63,158,99,.2)}
+.cmb-acts{display:flex; flex-wrap:wrap; gap:6px}
+.cmb-acts button, .cmb-vp{font:inherit; font-size:11.5px; cursor:pointer; color:#e9e7dd;
+  border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.04); border-radius:8px;
+  padding:7px 10px; display:inline-flex; align-items:center; gap:6px; transition:background .2s, border-color .2s}
+.cmb-acts button:hover, .cmb-vp:hover{background:rgba(255,255,255,.1)}
+#cmb-id-btn[aria-pressed="true"]{background:#3f9e63; border-color:#3f9e63; color:#fff}
+.cmb-vps{display:flex; align-items:center; gap:6px}
+.cmb-vps-lab{font-size:10.5px; color:#9a988b; text-transform:uppercase; letter-spacing:.12em; margin-right:2px}
+.cmb-vp[aria-pressed="true"]{background:rgba(255,255,255,.16); border-color:rgba(255,255,255,.3)}
+.cmb-scroll{flex:1; overflow-y:auto; padding:10px 12px 64px}
+.cmb-scroll::-webkit-scrollbar{width:9px}
+.cmb-scroll::-webkit-scrollbar-thumb{background:rgba(255,255,255,.14); border-radius:5px}
+
+.cmb-subh{font-size:10.5px; text-transform:uppercase; letter-spacing:.14em; color:#9a988b; margin:6px 4px 8px}
+.cmb-snaps-wrap{border-bottom:1px solid rgba(255,255,255,.08); padding-bottom:12px; margin-bottom:6px}
+.cmb-empty{font-size:12px; color:#7c7a6e; margin:0 4px}
+.cmb-snap{display:flex; align-items:center; gap:6px; padding:5px 6px; border-radius:8px}
+.cmb-snap:hover{background:rgba(255,255,255,.05)}
+.cmb-snap span{flex:1; font-size:12.5px}
+.cmb-mini{font:inherit; font-size:11px; cursor:pointer; color:#cfcdbf; background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.1); border-radius:6px; padding:3px 8px}
+.cmb-mini:hover{background:rgba(255,255,255,.12)}
+
+/* category accordion */
+.cmb-cat{border-bottom:1px solid rgba(255,255,255,.06)}
+.cmb-cat-h{width:100%; display:flex; align-items:center; justify-content:space-between; cursor:pointer;
+  background:none; border:none; color:#e9e7dd; font:inherit; font-size:12.5px; font-weight:600;
+  letter-spacing:.04em; text-transform:uppercase; padding:13px 4px}
+.cmb-cat-h span{display:flex; align-items:center; gap:8px}
+.cmb-cat-h i:first-child{color:#3f9e63; font-size:15px}
+.cmb-caret{transition:transform .25s; color:#7c7a6e; font-size:14px}
+.cmb-cat:not(.open) .cmb-cat-body{display:none}
+.cmb-cat:not(.open) .cmb-caret{transform:rotate(-90deg)}
+.cmb-cat-body{padding:2px 0 12px}
+
+.cmb-grp{padding:9px 4px; border-radius:9px}
+.cmb-grp:hover{background:rgba(255,255,255,.03)}
+.cmb-lab{display:flex; align-items:center; gap:7px; margin-bottom:7px}
+.cmb-lab span{flex:1; font-size:12.5px; color:#d9d7cb}
+.cmb-jump{flex:0 0 auto; width:22px; height:22px; padding:0; border-radius:6px; cursor:pointer;
+  border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.04); color:#9fd0ad;
+  display:inline-grid; place-items:center; font-size:12px; transition:background .15s, color .15s, border-color .15s}
+.cmb-jump:hover{background:#3f9e63; border-color:#3f9e63; color:#fff}
+.cmb-k{font-family:"JetBrains Mono",ui-monospace,monospace; font-size:10px; color:#8f8d80;
+  background:rgba(255,255,255,.05); padding:1px 6px; border-radius:5px; max-width:130px;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.cmb-opts{display:flex; flex-wrap:wrap; gap:5px}
+.cmb-opt{font:inherit; font-size:11.5px; cursor:pointer; color:#c8c6b9; background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.1); border-radius:7px; padding:5px 9px;
+  transition:background .15s, border-color .15s, color .15s}
+.cmb-opt:hover{background:rgba(255,255,255,.1); color:#fff}
+.cmb-opt[aria-pressed="true"]{background:#3f9e63; border-color:#3f9e63; color:#fff; font-weight:500}
+
+/* lock-and-randomize chrome (gold = locked, distinct from green = selected) */
+.cmb-lock{flex:0 0 auto; width:22px; height:22px; padding:0; border-radius:6px; cursor:pointer;
+  border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.04); color:#8f8d80;
+  display:inline-grid; place-items:center; font-size:12px; transition:background .15s, color .15s, border-color .15s}
+.cmb-lock:hover{background:rgba(255,255,255,.1); color:#e9e7dd}
+.cmb-lock[aria-pressed="true"]{background:#caa24a; border-color:#caa24a; color:#1b1c14}
+.cmb-grp.cmb-locked{background:rgba(202,162,74,.08); box-shadow:inset 2px 0 0 0 #caa24a}
+.cmb-grp.cmb-locked .cmb-opts{opacity:.5}
+.cmb-grp.cmb-locked .cmb-lab > span{color:#e3c98a}
+.cmb-catlock{margin-left:auto; margin-right:8px; width:22px; height:22px; flex:0 0 auto; border-radius:6px; cursor:pointer;
+  border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.04); color:#8f8d80;
+  display:inline-grid; place-items:center; font-size:12px; transition:background .15s, color .15s, border-color .15s}
+.cmb-catlock:hover{background:rgba(255,255,255,.1); color:#e9e7dd}
+.cmb-catlock.on{background:#caa24a; border-color:#caa24a; color:#1b1c14}
+.cmb-catlock.partial{border-color:#caa24a; color:#e3c98a}
+#cmb-lockall[aria-pressed="true"]{background:#caa24a; border-color:#caa24a; color:#1b1c14}
+
+/* background-tone colour wheel (paper dim: custom-hex escape hatch) */
+.cmb-color{display:flex; align-items:center; gap:9px; margin-top:9px; padding-top:9px; border-top:1px dashed rgba(255,255,255,.1)}
+.cmb-color-sw{position:relative; width:30px; height:30px; flex:0 0 auto; border-radius:8px; overflow:hidden;
+  border:1px solid rgba(255,255,255,.22); cursor:pointer; box-shadow:0 1px 4px rgba(0,0,0,.3)}
+.cmb-color-input{position:absolute; top:-6px; left:-6px; width:46px; height:46px; border:none; padding:0; background:none; cursor:pointer}
+.cmb-color-input::-webkit-color-swatch-wrapper{padding:0}
+.cmb-color-input::-webkit-color-swatch{border:none}
+.cmb-color-cap{font-size:11.5px; color:#c8c6b9}
+
+/* fab */
+#cmb-fab{position:fixed; bottom:18px; right:18px; z-index:60; width:46px; height:46px; border-radius:50%;
+  border:1px solid rgba(255,255,255,.15); background:#1b1c14; color:#e9e7dd; cursor:pointer; font-size:19px;
+  display:none; place-items:center; box-shadow:0 12px 30px -10px rgba(0,0,0,.6)}
+body.cmb-dock-hidden #cmb-fab{display:grid}
+
+/* compare overlay */
+.cmb-compare{position:fixed; inset:0; z-index:80; background:#0e0f0a; display:flex; flex-direction:column}
+.cmb-cmp-bar{display:flex; align-items:center; gap:14px; padding:10px 16px; color:#e9e7dd;
+  border-bottom:1px solid rgba(255,255,255,.1); font-size:13px}
+.cmb-cmp-bar span{color:#9a988b; font-size:12px}
+.cmb-cmp-bar button{margin-left:auto; font:inherit; cursor:pointer; color:#e9e7dd;
+  background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.14); border-radius:7px; padding:6px 12px}
+.cmb-cmp-grid{flex:1; display:grid; grid-template-columns:1fr 1fr; gap:1px; background:rgba(255,255,255,.08); min-height:0}
+.cmb-cmp-col{display:flex; flex-direction:column; background:#191a12; min-height:0}
+.cmb-cmp-lab{padding:8px 12px; font-size:11px; color:#9a988b; text-transform:uppercase; letter-spacing:.12em}
+.cmb-cmp-if{flex:1; width:100%; border:0; background:#f0f0f0}
+
+/* toast */
+.cmb-toast{position:fixed; bottom:22px; left:50%; transform:translateX(-50%) translateY(20px); z-index:90;
+  background:#0c0d09; color:#fff; padding:10px 18px; border-radius:10px; font-size:13px; opacity:0;
+  pointer-events:none; transition:opacity .25s, transform .25s; border:1px solid rgba(255,255,255,.12)}
+.cmb-toast.show{opacity:1; transform:translateX(-50%) translateY(0)}
+
+/* identify (rendered INSIDE the stage iframe) */
+.cmb-idlayer{position:fixed; inset:0; z-index:2147483000; pointer-events:none}
+.cmb-badge{position:fixed; top:0; left:0; font:600 11px/1 "JetBrains Mono",ui-monospace,monospace;
+  letter-spacing:.04em; color:#fff; background:#3f9e63; padding:5px 9px; border-radius:6px;
+  box-shadow:0 6px 18px -6px rgba(0,0,0,.5); white-space:nowrap; transition:opacity .2s; will-change:transform}
+/* side pointer: a triangle in the margin pointing at the element (no box, no text) */
+.cmb-pointer{position:fixed; top:0; left:0; z-index:2147483002; width:0; height:0; pointer-events:none;
+  animation:cmbPointGlow 1.05s ease-in-out infinite}
+.cmb-pointer.left{border-top:12px solid transparent; border-bottom:12px solid transparent; border-left:24px solid currentColor}
+.cmb-pointer.right{border-top:12px solid transparent; border-bottom:12px solid transparent; border-right:24px solid currentColor}
+@keyframes cmbPointGlow{0%,100%{filter:drop-shadow(0 2px 5px rgba(0,0,0,.4))}50%{filter:drop-shadow(0 0 10px currentColor) drop-shadow(0 2px 4px rgba(0,0,0,.4))}}
+body.cmb-identify::after{content:""; position:fixed; inset:0; z-index:2147482999; pointer-events:none;
+  box-shadow:inset 0 0 0 2px rgba(63,158,99,.4)}
+
+/* pick / inspect (reverse-peek): hover the page, dock highlights the owning control */
+#cmb-pick-btn[aria-pressed="true"]{background:#3f9e63; border-color:#3f9e63; color:#fff}
+.cmb-grp.cmb-target{background:rgba(63,158,99,.16); box-shadow:inset 0 0 0 1px rgba(63,158,99,.55)}
+body.cmb-picking{cursor:crosshair}
+
+/* view + saved permutations: spacing + collapsible */
+.cmb-vps{margin-top:4px; padding-top:12px; border-top:1px solid rgba(255,255,255,.08); flex-wrap:wrap}
+.cmb-vps-lab{display:inline-flex; align-items:center; gap:6px; cursor:pointer}
+.cmb-vps.cmb-collapsed .cmb-vp{display:none}
+.cmb-subh{cursor:pointer; display:flex; align-items:center; gap:6px}
+.cmb-snaps-wrap.cmb-collapsed #cmb-snaps{display:none}
+.cmb-vps .cmb-caret, .cmb-subh .cmb-caret{font-size:12px; color:#7c7a6e; transition:transform .2s}
+.cmb-vps.cmb-collapsed .cmb-caret, .cmb-snaps-wrap.cmb-collapsed .cmb-caret{transform:rotate(-90deg)}
+
+/* collapse the whole sidebar */
+#cmb-hide{flex:0 0 auto; width:24px; height:24px; padding:0; border-radius:6px; cursor:pointer;
+  border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.04); color:#cfcdbf;
+  display:inline-grid; place-items:center; font-size:13px; transition:background .15s, color .15s}
+#cmb-hide:hover{background:rgba(255,255,255,.12); color:#fff}
+
+/* jump flash (on "take me there") — outlines whatever element is targeted using
+   the target page's own live --accent token, so it reads correctly on any page */
+.cmb-jumpflash{animation:cmbJumpFlash 1.35s ease}
+@keyframes cmbJumpFlash{
+  0%{outline:3px solid color-mix(in srgb,var(--accent) 85%,transparent); outline-offset:5px}
+  60%{outline:3px solid color-mix(in srgb,var(--accent) 85%,transparent); outline-offset:5px}
+  100%{outline:3px solid transparent; outline-offset:5px}
+}
+
+/* jump button (on every dim) */
+.cmb-jump{color:#9fd0ad}
+.cmb-jump:hover{background:#3f9e63; border-color:#3f9e63; color:#fff}
+
+/* control bar — Randomize primary, tidy util grid */
+.cmb-acts{display:grid; grid-template-columns:repeat(3,1fr); gap:6px}
+.cmb-acts button{justify-content:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; padding-inline:8px}
+#cmb-rand{grid-column:1 / -1; background:#3f9e63; border-color:#3f9e63; color:#fff; font-weight:600; font-size:12.5px; padding:9px 10px}
+#cmb-rand:hover{background:#48b070; border-color:#48b070}
+#cmb-lockall{grid-column:1 / -1}
+#cmb-id-btn[aria-pressed="true"],#cmb-pick-btn[aria-pressed="true"]{background:#3f9e63; border-color:#3f9e63; color:#fff}
+/* a hair more separation between the action bar and the viewport row */
+.cmb-vps{margin-top:8px}
+
+/* embed: keep the target page scrollable/normal (the page's own CSS governs it) */
+html.cmb-embed-html, html.cmb-embed-html body{height:auto; overflow:visible}

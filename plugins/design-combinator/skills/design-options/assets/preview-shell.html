@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title><!-- SLOT: TITLE --></title>
+<!--
+  design-options :: preview-shell.html
+  Self-contained variants-page shell (references/preview.md builds one of these per
+  structural pick). Zero external requests: all CSS/JS is inline below.
+
+  Runtime contract — replace the matching HTML-comment placeholder markers with real markup,
+  nothing else (marker names below are written WITHOUT comment delimiters to avoid nesting
+  HTML comments, which is illegal — find the literal "SLOT: TITLE" / "SLOT: VARIANTS" markers
+  elsewhere in this file):
+    SLOT: TITLE        one line, e.g. "Features — 4 variants"
+    SLOT: VARIANTS     one <section class="dov-variant"> per rendition, each:
+                          <section class="dov-variant" id="v3">
+                            <header class="dov-variant__label">#3 — ledger-table</header>
+                            <iframe class="dov-iframe" data-src="variants/v3.html"
+                                    loading="lazy" title="Variant 3 — ledger-table"></iframe>
+                          </section>
+                        (use data-src, not src — see loader script below; keeps iframes from
+                        all loading at once on a long variants page)
+
+  The viewport toggle (360 / 768 / 1440) resizes every .dov-iframe at once so responsive
+  behavior is part of the comparison (spec S5.2 step 3) — every variant's scoped CSS must
+  cover its own <=768px behavior for this to mean anything.
+-->
+<style>
+  :root {
+    color-scheme: light dark;
+    --dov-bg: #f6f6f4;
+    --dov-panel: #ffffff;
+    --dov-ink: #16181a;
+    --dov-muted: #6b7076;
+    --dov-line: #dcdedf;
+    --dov-accent: #2f6f5e;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --dov-bg: #121314;
+      --dov-panel: #1b1d1f;
+      --dov-ink: #f0f1f2;
+      --dov-muted: #9a9fa5;
+      --dov-line: #2c2f32;
+      --dov-accent: #6fc9ae;
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--dov-bg);
+    color: var(--dov-ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  }
+  header.dov-header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    padding: 14px 20px;
+    background: var(--dov-panel);
+    border-bottom: 1px solid var(--dov-line);
+  }
+  .dov-header__title {
+    font-size: 15px;
+    font-weight: 600;
+    margin: 0;
+  }
+  .dov-header__hint {
+    font-size: 12px;
+    color: var(--dov-muted);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  .dov-toggle {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+  .dov-toggle__label {
+    font-size: 11px;
+    color: var(--dov-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-right: 4px;
+  }
+  .dov-toggle button {
+    font: inherit;
+    font-size: 12px;
+    padding: 6px 10px;
+    border: 1px solid var(--dov-line);
+    background: var(--dov-panel);
+    color: var(--dov-ink);
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  .dov-toggle button[aria-pressed="true"] {
+    background: var(--dov-accent);
+    border-color: var(--dov-accent);
+    color: #fff;
+  }
+  main.dov-variants {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    padding: 24px;
+    max-width: 1520px;
+    margin: 0 auto;
+  }
+  .dov-variant {
+    background: var(--dov-panel);
+    border: 1px solid var(--dov-line);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .dov-variant__label {
+    padding: 10px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    border-bottom: 1px solid var(--dov-line);
+    color: var(--dov-ink);
+  }
+  .dov-iframe-wrap {
+    width: 100%;
+    overflow-x: auto;
+    background: repeating-linear-gradient(
+      45deg, transparent, transparent 10px, rgba(128,128,128,0.05) 10px, rgba(128,128,128,0.05) 20px
+    );
+  }
+  iframe.dov-iframe {
+    display: block;
+    border: 0;
+    width: 1440px;
+    height: 640px;
+    background: #fff;
+    transition: width 0.15s ease;
+  }
+  .dov-empty {
+    padding: 40px 20px;
+    color: var(--dov-muted);
+    font-size: 13px;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+  <header class="dov-header">
+    <div>
+      <p class="dov-header__title"><!-- SLOT: TITLE --></p>
+      <p class="dov-header__hint">reply: apply #N</p>
+    </div>
+    <div class="dov-toggle" role="group" aria-label="Viewport width">
+      <span class="dov-toggle__label">Viewport</span>
+      <button type="button" data-width="360">360</button>
+      <button type="button" data-width="768">768</button>
+      <button type="button" data-width="1440" aria-pressed="true">1440</button>
+    </div>
+  </header>
+
+  <main class="dov-variants">
+    <!-- SLOT: VARIANTS -->
+  </main>
+
+  <script>
+  (function () {
+    "use strict";
+
+    // Lazy-load iframes: swap data-src -> src the first time each one nears the viewport,
+    // so a variants page with many renditions doesn't fetch them all up front.
+    var io = ("IntersectionObserver" in window)
+      ? new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) {
+            if (entry.isIntersecting) {
+              var el = entry.target;
+              var src = el.getAttribute("data-src");
+              if (src && !el.getAttribute("src")) el.setAttribute("src", src);
+              io.unobserve(el);
+            }
+          });
+        }, { rootMargin: "200px 0px" })
+      : null;
+
+    var frames = document.querySelectorAll("iframe.dov-iframe[data-src]");
+    frames.forEach(function (el) {
+      if (io) {
+        io.observe(el);
+      } else {
+        el.setAttribute("src", el.getAttribute("data-src"));
+      }
+    });
+
+    if (frames.length === 0) {
+      var main = document.querySelector("main.dov-variants");
+      if (main && !main.querySelector(".dov-variant")) {
+        var empty = document.createElement("p");
+        empty.className = "dov-empty";
+        empty.textContent = "No variants loaded yet — replace the VARIANTS slot with one .dov-variant section per rendition.";
+        main.appendChild(empty);
+      }
+    }
+
+    // Viewport-width toggle: resizes every iframe at once.
+    var buttons = document.querySelectorAll(".dov-toggle button[data-width]");
+    buttons.forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var width = btn.getAttribute("data-width");
+        document.querySelectorAll("iframe.dov-iframe").forEach(function (el) {
+          el.style.width = width + "px";
+        });
+        buttons.forEach(function (b) { b.setAttribute("aria-pressed", String(b === btn)); });
+      });
+    });
+  })();
+  </script>
+</body>
+</html>

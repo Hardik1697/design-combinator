@@ -1,0 +1,160 @@
+{
+  "_note": "FIXTURE — a hand-authored example page (real tokens: --cobalt-600 #2f5fe0, --surface #fcfcfd, --ink-950 #121316, Archivo/IBM Plex Sans, --radius-card 14px, .btn/.btn-primary, .hero/.section). Exercises all three mechanisms (token, component, markup) plus one multi dim. In a real run the serializer produces this from .design-options/audit.md; here it is hand-authored to lock the schema shape.",
+  "meta": {
+    "target": "example-site/index.html",
+    "mode": "local",
+    "brand": "example",
+    "currentTokens": {
+      "H": "#2f5fe0",
+      "paper": "#fcfcfd",
+      "ink": "#121316",
+      "hasCustomProps": true,
+      "varNames": {
+        "accent": "--cobalt-600",
+        "paper": "--surface",
+        "ink": "--ink-950",
+        "headingFont": "--font-heading",
+        "bodyFont": "--font-body",
+        "radius": "--radius-card"
+      }
+    },
+    "componentSelectors": {
+      "button": ".btn, .btn-primary",
+      "cta": ".btn-primary",
+      "emphasis": "em, strong, mark",
+      "divider": ".hairline-top, .hairline-bottom"
+    },
+    "fontFamilies": ["Archivo", "Fraunces", "Spectral", "IBM Plex Sans"],
+    "insertAnchors": {
+      "headEnd": "</head>",
+      "bodyEnd": "</body>",
+      "cssLink": "<link rel=\"stylesheet\" href=\"styles.css\">"
+    }
+  },
+  "categories": [
+    {
+      "cat": "Typography",
+      "icon": "text-aa",
+      "dims": [
+        {
+          "key": "heading",
+          "label": "Heading font",
+          "mechanism": "token",
+          "cssVars": ["--font-heading"],
+          "multi": false,
+          "default": "current",
+          "jumpSelector": ".hero h1",
+          "options": [
+            { "name": "current", "rationale": "the page's own Archivo grotesque, unchanged", "vars": { "--font-heading": "'Archivo', -apple-system, 'Segoe UI', sans-serif" } },
+            { "name": "didone-drama", "rationale": "your headings are a neutral grotesque -> a high-contrast didone adds editorial authority to the H1 numeral", "vars": { "--font-heading": "'Fraunces', Georgia, serif" } },
+            { "name": "warm-serif", "rationale": "softens the clinical cobalt-on-white with a humanist serif voice", "vars": { "--font-heading": "'Spectral', Georgia, serif" } }
+          ]
+        }
+      ]
+    },
+    {
+      "cat": "Color & Theme",
+      "icon": "palette",
+      "dims": [
+        {
+          "key": "accent",
+          "label": "Accent hue",
+          "mechanism": "token",
+          "cssVars": ["--cobalt-600"],
+          "multi": false,
+          "default": "current",
+          "jumpSelector": ".hero .btn-primary",
+          "options": [
+            { "name": "current", "rationale": "the page's own cobalt #2f5fe0, unchanged", "vars": { "--cobalt-600": "#2f5fe0" } },
+            { "name": "complement-pop", "rationale": "your accent #2f5fe0 sits alone in blue -> a chroma-matched warm pop (H rotated ~180 deg) reserved for CTAs", "vars": { "--cobalt-600": "#e0662f" } },
+            { "name": "deepen", "rationale": "drop the cobalt a step toward #2547b3 for a more grown-up, less saturated trust register", "vars": { "--cobalt-600": "#2547b3" } }
+          ]
+        },
+        {
+          "key": "paper",
+          "label": "Paper tone",
+          "mechanism": "token",
+          "cssVars": ["--surface"],
+          "multi": false,
+          "default": "current",
+          "jumpSelector": ".hero",
+          "options": [
+            { "name": "current", "rationale": "the page's own near-white #fcfcfd", "vars": { "--surface": "#fcfcfd" } },
+            { "name": "warm-paper", "rationale": "your ground is a cool near-white -> a warm ivory #f7f4ee reads calmer and less clinical", "vars": { "--surface": "#f7f4ee" } }
+          ]
+        }
+      ]
+    },
+    {
+      "cat": "Shape & Surface",
+      "icon": "shapes",
+      "dims": [
+        {
+          "key": "radius",
+          "label": "Corner radius",
+          "mechanism": "token",
+          "cssVars": ["--radius-card"],
+          "multi": false,
+          "default": "current",
+          "jumpSelector": ".section",
+          "options": [
+            { "name": "current", "rationale": "the page's own 14px card radius", "vars": { "--radius-card": "14px" } },
+            { "name": "knife-edge", "rationale": "your 14px rounding reads friendly -> radius 0 turns the surfaces architectural and precise", "vars": { "--radius-card": "0px" } },
+            { "name": "soft-8", "rationale": "tighten to 8px to match the input radius for a more uniform system", "vars": { "--radius-card": "8px" } }
+          ]
+        }
+      ]
+    },
+    {
+      "cat": "Components",
+      "icon": "square",
+      "dims": [
+        {
+          "key": "buttons",
+          "label": "Button language",
+          "mechanism": "component",
+          "multi": false,
+          "default": "current",
+          "jumpSelector": ".hero .btn-primary",
+          "options": [
+            { "name": "current", "rationale": "the page's own filled cobalt button", "css": "" },
+            { "name": "square-ghost", "rationale": "your .btn-primary is a filled pill -> a hollow square with a 1px ink border reads more editorial", "css": ".btn, .btn-primary{ border-radius:0; background:transparent; color:var(--ink-950); border:1px solid var(--ink-950) }" },
+            { "name": "soft-lift", "rationale": "keep the fill but add a tinted cast so CTAs float off the near-white ground", "css": ".btn, .btn-primary{ box-shadow:0 1px 2px rgba(18,19,22,.06), 0 8px 24px color-mix(in srgb, var(--cobalt-600) 18%, transparent) }" }
+          ]
+        },
+        {
+          "key": "emphasis",
+          "label": "Emphasis marks",
+          "mechanism": "component",
+          "multi": true,
+          "default": "italic-accent",
+          "jumpSelector": ".hero .lede",
+          "options": [
+            { "name": "italic-accent", "rationale": "emphasized copy leans on the accent -> italic in var(--cobalt-600)", "css": "em, i{ font-style:italic; color:var(--cobalt-600) }" },
+            { "name": "underline-strong", "rationale": "strong text gets a 2px accent underline offset for scannability", "css": "strong, b{ text-decoration:underline; text-decoration-color:var(--cobalt-600); text-underline-offset:3px }" },
+            { "name": "highlight-mark", "rationale": "marked text gets a translucent accent wash", "css": "mark{ background:color-mix(in srgb, var(--cobalt-600) 18%, transparent); color:inherit }" }
+          ]
+        }
+      ]
+    },
+    {
+      "cat": "Sections",
+      "icon": "layout",
+      "dims": [
+        {
+          "key": "hero",
+          "label": "Hero layout",
+          "mechanism": "markup",
+          "target": ".hero",
+          "multi": false,
+          "default": "current",
+          "jumpSelector": ".hero",
+          "options": [
+            { "name": "current", "rationale": "the page's own hero, captured verbatim at generate time", "html": "<!-- ORIGINAL .hero outerHTML captured by the generator at build time -->", "rewire": { "reveal": true, "ids": [], "hooks": [] } },
+            { "name": "centered-stack", "rationale": "your hero is a left-aligned split -> a centered single-column stack puts the cobalt CTA dead-center for a focused first read", "html": "<section class=\"hero hero--centered\" data-reveal><div class=\"container\"><p class=\"eyebrow\">AI front desk for growing businesses</p><h1 style=\"font-family:var(--font-heading);text-align:center\">Never miss another customer call</h1><p class=\"lede\" style=\"text-align:center\">Example answers, books, and follows up 24/7 in your business's voice.</p><div class=\"cta-row\" style=\"justify-content:center\"><a class=\"btn btn-primary\" href=\"#demo\">Hear it live</a></div></div></section>", "rewire": { "reveal": true, "ids": [], "hooks": [] } }
+          ]
+        }
+      ]
+    }
+  ]
+}
