@@ -1,5 +1,6 @@
 {
   "name": "design-combinator",
+  "description": "Grounded, combinable design-exploration tools for existing pages: audit a page and play with its fonts, colors, components, and section layouts live in the browser.",
   "owner": {
     "name": "Hardik Anand",
     "email": "hardikanand.cs@gmail.com"
