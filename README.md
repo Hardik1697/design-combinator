@@ -1,37 +1,30 @@
 # design-combinator
 
-**A live, in-browser, *combinable* design-exploration dock for any existing page — grounded in that page's own identity.**
+Point it at a page, a local file or a live URL, and it gives you a playground in your browser for reworking how that page looks. It reads the page's real fonts, colors, buttons, and section layouts, comes up with named alternatives that actually fit what's there, and lets you mix them and watch the page change as you go. You can try a new heading font with a warmer accent and a different hero layout all at once, instead of guessing from three separate mockups.
 
-Point it at a local page or a live URL. It audits the page, generates named design options grounded in the page's *real* fonts, colors, components, and sections, then hands you a live dock in your browser where you combine those options and see the compound result instantly — a font pick **and** a color pick **and** a section relayout, live, not three separate static previews judged one at a time.
+Shuffle for random combinations, lock the parts you want to keep, save versions to compare, and copy the settings out once you land on something you like.
 
-Randomize. Lock the ones you like. Save snapshots. Compare A/B. Copy the config.
+## Two skills, one job
 
----
+It's two Claude Code skills that work as a pair.
 
-## Why this exists
+`design-options` reads the page and proposes the alternatives. Each option is tied to something real about the page: its dominant hue rotated a little, its off-white background warmed up, a font that suits its voice. It doesn't reach for generic choices.
 
-Most "design options" tools show you static cards — you can't feel how option A combines with option B. And live "theme playground" tools ship a fixed, generic option list grounded in nothing. This bundles the two halves:
+`design-combinator` takes those proposals and builds the live dock you click around in.
 
-- **`design-options`** (the brain) audits the page and generates options grounded in *its* identity — its accent hue rotated, its paper warmed, fonts that fit its voice. Every option cites a real fact about the page.
-- **`design-combinator`** (the delivery) turns those grounded options into a live, combinable dock.
+Since the options come from the page itself, you get a completely different set of choices on two different sites. Nothing is boilerplate, and nothing carries over from one page to the next.
 
-Same tool, pointed at two different sites → two entirely different, grounded option sets. Nothing generic, nothing carried over.
+## What you can change
 
----
+Three kinds of edits, all driven by the page's own styling.
 
-## How it works
+**Tokens** are the fonts, colors, type scale, corner radius, shadows, spacing, and motion. These swap the page's CSS variables live.
 
-Three delivery mechanisms, all driven by the page's own identity:
+**Components** are buttons, links, dividers, list markers. These write rules against the selectors the page already uses, so they keep matching your color and font picks.
 
-| | |
-|---|---|
-| **Token swaps** | fonts, colors, type scale, radius, elevation, spacing, motion → live CSS-variable writes on the page's own vars |
-| **Component rules** | buttons, links, dividers, list markers → style rules scoped to the page's *real* selectors, using `var()` so they recolor when you change a token |
-| **Section swaps** | hero recompose, cards→rows, etc. → the section's DOM is swapped live, and your token/component picks still hold on the new markup |
+**Sections** let you recompose the hero, turn a card grid into stacked rows, that sort of thing. The section's markup gets swapped out live, and your token and component picks still land on the new layout.
 
-You combine across all three at once. A section swap doesn't drop your font/color picks — they compose.
-
----
+Everything composes. Swapping a section doesn't throw away the font or color you chose; they carry onto the new markup.
 
 ## Install
 
@@ -42,70 +35,43 @@ In Claude Code:
 /plugin install design-combinator@design-combinator
 ```
 
-This installs both skills together (they work as a pair).
+Both skills install together, since they only work as a pair.
 
-## Use
+## Using it
 
 ```
 /design-combinator <page-or-url>
 ```
 
-or just ask in natural language — "give me a live combinator for ./index.html", "let me combine fonts and colors on example.com live".
+Or just ask in plain language, something like "give me a live combinator for ./index.html" or "let me play with fonts and colors on example.com."
 
-The skill audits the page (via `design-options`), builds a self-contained combinator page, serves it locally, and prints a URL. Open it in your browser and explore. When you've found a combination you like, **Copy config** gives you paste-ready output to apply back to your real stylesheet.
+It reads the page, builds a self-contained combinator version of it, serves that on a local web server, and prints a URL. Open it in your browser and start clicking. When a combination clicks for you, hit Copy config and you get paste-ready output to drop back into your real stylesheet.
 
----
+## What you'll need
 
-## Requirements
+- Claude Code with plugin support.
+- python3, which it uses to serve the dock over local HTTP.
+- A real browser, since you drive the dock by hand.
+- An internet connection while you use it, because the dock pulls fonts from Google Fonts and icons from Phosphor.
 
-- **Claude Code** with plugin support.
-- **`python3`** — used to serve the generated dock over local HTTP.
-- **A real browser** — the dock is an interactive local tool you drive yourself.
-- **Internet access at runtime** — the dock loads fonts (Google Fonts) and icons (Phosphor) from live CDNs.
+The dock runs on a local server rather than as a shareable link or a Claude Artifact. It relies on those live font and icon CDNs, and it's an interactive tool rather than a static page. Open it offline and the fonts fall back to defaults and the icons vanish.
 
-> **Note:** the dock runs on a **local HTTP server**, not as a shareable static link or a Claude Artifact — it depends on those live font/icon CDNs and is an interactive tool, not a static page. Offline, fonts fall back and icon glyphs vanish.
+## Where it stops
 
----
+The dock covers whatever design-options can pull from your page: the full set of tokens, the components the page actually has, and one layout option per section it recognizes.
 
-## What it covers (and what it doesn't)
+A few things it won't wire up for you. Anything driven by JavaScript, like a count-up number or a magnetic hover, and one-off sections that don't match a known pattern. You can still add those by hand (there's a guide in the skill's `authoring.md`), so full coverage on a given page is possible, just not automatic.
 
-Coverage is whatever `design-options` can ground for your page:
+And it's a place to explore, not a judge. It won't rank the options or pick a favorite. That part's yours.
 
-- ✅ Full token surface (type, color, shape, space, motion)
-- ✅ The components your page actually has (buttons, links, dividers, …)
-- ✅ One section-layout dimension per morphable section it detects
+## Contributing and feedback
 
-Not automatic:
+Ideas are welcome. This is the kind of tool that gets better the more real pages people throw at it.
 
-- ⚠️ **JS-bound effects** (count-up, magnetic hover, custom entrance animations) and **truly page-unique sections** don't auto-appear. They can be hand-added — see the bundled `authoring.md` — so coverage can still reach "everything" on a given page, just not automatically.
+Have an idea? [Open a suggestion](https://github.com/Hardik1697/design-combinator/issues/new?template=suggestion.yml). Found a bug? [File a report](https://github.com/Hardik1697/design-combinator/issues/new?template=bug_report.yml). Want to build something? Fork it, make a branch, send a pull request. There's a walkthrough in [CONTRIBUTING.md](CONTRIBUTING.md).
 
-It is an exploration surface, not a critic: it never ranks options or auto-picks a winner. You keep taste authority.
-
----
-
-## What's inside
-
-```
-plugins/design-combinator/
-  skills/
-    design-options/       # the brain: audit + grounded option generation
-    design-combinator/    # the delivery: config schema, generator, live dock, serializers
-```
-
----
-
-## Contributing & feedback
-
-Ideas and improvements are very welcome — this tool is meant to grow with what people actually need.
-
-- 💡 **Have an idea?** [Open a suggestion](https://github.com/Hardik1697/design-combinator/issues/new?template=suggestion.yml) — even a rough one.
-- 🐛 **Hit a bug?** [File a bug report](https://github.com/Hardik1697/design-combinator/issues/new?template=bug_report.yml).
-- 🔧 **Want to build it?** Fork → branch → PR. See [CONTRIBUTING.md](CONTRIBUTING.md).
-
-Every suggestion is read and triaged — see the [contributing guide](CONTRIBUTING.md) for how.
-
----
+Everything that comes in gets read and sorted.
 
 ## License
 
-MIT © 2026 Hardik Anand
+MIT, copyright 2026 Hardik Anand.
