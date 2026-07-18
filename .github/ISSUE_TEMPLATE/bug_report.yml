@@ -1,0 +1,50 @@
+name: 🐛 Bug report
+description: Something in the skill or the live dock isn't working as expected.
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report. Concrete repro steps get fixes fastest.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What went wrong, and what did you expect instead?
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      description: What page did you run it on, and what did you do?
+      placeholder: |
+        1. Ran the combinator on ...
+        2. Picked dimensions ...
+        3. In the dock, clicked ...
+        4. Expected X, got Y
+    validations:
+      required: true
+  - type: input
+    id: page
+    attributes:
+      label: Target page (URL or description)
+      description: The page you pointed it at, if shareable.
+    validations:
+      required: false
+  - type: textarea
+    id: env
+    attributes:
+      label: Environment
+      description: OS, Claude Code version, browser, and whether python3 is available.
+      placeholder: "e.g. macOS 15 · Claude Code 2.x · Chrome · python3 3.12"
+    validations:
+      required: false
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: I searched existing issues and this isn't a duplicate
+          required: false

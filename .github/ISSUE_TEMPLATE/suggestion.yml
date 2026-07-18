@@ -1,0 +1,51 @@
+name: 💡 Suggestion / improvement
+description: Suggest a new capability, dimension, or improvement.
+title: "[Suggestion]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve design-combinator! Specific, grounded suggestions are the easiest to act on — but a rough idea is very welcome too.
+  - type: textarea
+    id: idea
+    attributes:
+      label: What's the idea?
+      description: What should it do that it doesn't today?
+      placeholder: 'e.g. "add a dimension for animated gradient backgrounds", "let me lock a section swap and randomize everything else", ...'
+    validations:
+      required: true
+  - type: textarea
+    id: scenario
+    attributes:
+      label: What page or scenario prompted this?
+      description: The kind of page or situation where you hit the limitation. A URL or short description helps.
+    validations:
+      required: false
+  - type: dropdown
+    id: area
+    attributes:
+      label: Which part does this touch?
+      options:
+        - The live dock (combining / UX / randomize / lock / compare)
+        - Grounded options (what design-options generates)
+        - A specific dimension (token / component / section)
+        - Install / packaging
+        - Docs
+        - Other / not sure
+    validations:
+      required: false
+  - type: textarea
+    id: proposed
+    attributes:
+      label: How might it work? (optional)
+      description: If you have a shape in mind — behavior, config, dock UI — sketch it. No wrong answers.
+    validations:
+      required: false
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: I searched existing issues and this isn't already suggested
+          required: false

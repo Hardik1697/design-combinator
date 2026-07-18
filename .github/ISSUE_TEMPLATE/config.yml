@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: 📖 Contributing guide
+    url: https://github.com/Hardik1697/design-combinator/blob/main/CONTRIBUTING.md
+    about: How suggestions are triaged and how to contribute a change.

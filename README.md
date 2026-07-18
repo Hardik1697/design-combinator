@@ -94,6 +94,18 @@ plugins/design-combinator/
 
 ---
 
+## Contributing & feedback
+
+Ideas and improvements are very welcome — this tool is meant to grow with what people actually need.
+
+- 💡 **Have an idea?** [Open a suggestion](https://github.com/Hardik1697/design-combinator/issues/new?template=suggestion.yml) — even a rough one.
+- 🐛 **Hit a bug?** [File a bug report](https://github.com/Hardik1697/design-combinator/issues/new?template=bug_report.yml).
+- 🔧 **Want to build it?** Fork → branch → PR. See [CONTRIBUTING.md](CONTRIBUTING.md).
+
+Every suggestion is read and triaged — see the [contributing guide](CONTRIBUTING.md) for how.
+
+---
+
 ## License
 
 MIT © 2026 Hardik Anand
