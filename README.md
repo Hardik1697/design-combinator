@@ -64,6 +64,24 @@ A few things it won't wire up for you. Anything driven by JavaScript, like a cou
 
 And it's a place to explore, not a judge. It won't rank the options or pick a favorite. That part's yours.
 
+## What's inside
+
+The repo doubles as its own plugin marketplace. One plugin, two skills:
+
+```
+design-combinator/
+├── .claude-plugin/marketplace.json       the marketplace catalog
+├── plugins/
+│   └── design-combinator/
+│       ├── .claude-plugin/plugin.json    the plugin manifest
+│       └── skills/
+│           ├── design-options/           reads the page, generates the grounded options
+│           └── design-combinator/        builds the live dock (engine in assets/combinator/)
+├── CONTRIBUTING.md
+├── README.md
+└── LICENSE
+```
+
 ## Contributing and feedback
 
 Ideas are welcome. This is the kind of tool that gets better the more real pages people throw at it.
